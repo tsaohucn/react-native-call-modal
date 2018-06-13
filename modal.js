@@ -33,11 +33,12 @@ async function wait(ms) {
 export const connectCallModal = function(WrappedComponent) {
   return class extends Component {
     state = {
-      animationType: 'slide',
+      animationType: 'none',
       visible: false,
       onModalClose: () => {},
       content: () => null,
       closeWhenPressBackground: false,
+      closeWhenPressRequestClose: false,
       backgroundColor: 'rgba(0, 0, 0, 0.3)',
     };
     componentDidMount() {
@@ -49,18 +50,25 @@ export const connectCallModal = function(WrappedComponent) {
       }
     };
 
+    onRequestClose = () => {
+      if (this.state.closeWhenPressRequestClose) {
+        this.handleCloseModal();
+      }      
+    };
+
     handleContentPress = () => {
       return false;
     };
     handleCloseModal = () => {
       this.state.onModalClose();
       this.setState({
-        animationType: 'slide',
+        animationType: 'none',
         visible: false,
         isAnimating: true,
         onModalClose: () => {},
         content: () => null,
         closeWhenPressBackground: false,
+        closeWhenPressRequestClose: false,
         backgroundColor: 'rgba(0, 0, 0, 0.3)',
       });
       setTimeout(() => {
@@ -86,8 +94,10 @@ export const connectCallModal = function(WrappedComponent) {
           visible: true,
           content: property.renderFunction,
           onModalClose: resolve,
+          animationType: property.animationType || 'none',
           backgroundColor: property.backgroundColor || 'rgba(0, 0, 0, 0.3)',
           closeWhenPressBackground: property.closeWhenPressBackground,
+          closeWhenPressRequestClose: property.closeWhenPressRequestClose
         });
       });
     };
@@ -103,7 +113,7 @@ export const connectCallModal = function(WrappedComponent) {
             animationType={this.state.animationType}
             visible={this.state.visible}
             supportedOrientations={supportedOrientations}
-            onRequestClose={this.handleCloseModal}
+            onRequestClose={this.onRequestClose}
           >
             <TouchableWithoutFeedback onPress={this.handleBackgroundPress}>
               <View
